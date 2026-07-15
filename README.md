@@ -1,5 +1,7 @@
 # Blast Radius
 
+[![CI](https://github.com/ctkrug/blast-radius/actions/workflows/ci.yml/badge.svg)](https://github.com/ctkrug/blast-radius/actions/workflows/ci.yml)
+
 Paste a shell command or script and get a plain-English risk breakdown — what it deletes,
 where it fetches from and pipes to, what needs root — before you run something an agent just
 handed you.
