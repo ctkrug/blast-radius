@@ -1,0 +1,8 @@
+import type { CommandRule, PipelineRule } from "../risk-engine";
+
+/**
+ * Central registry of risk rules. Each rule module (Epic 2) registers itself
+ * here; the engine has no built-in knowledge of any specific danger pattern.
+ */
+export const commandRules: CommandRule[] = [];
+export const pipelineRules: PipelineRule[] = [];
