@@ -1,3 +1,28 @@
+:root {
+  --bg: #0a1128;
+  --surface-1: #101b3d;
+  --surface-2: #16234d;
+  --text: #e8edf9;
+  --text-muted: #8996b8;
+  --accent: #35c9c1;
+  --accent-support: #ffb454;
+  --danger: #ff5c5c;
+  --success: #4ade80;
+  --grid-line: rgba(53, 201, 193, 0.08);
+
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-6: 48px;
+  --space-8: 64px;
+
+  --radius: 4px;
+  --font-display: "Space Grotesk", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", monospace;
+  --transition: 150ms ease-out;
+}
+
 *,
 *::before,
 *::after {
@@ -11,7 +36,28 @@ body {
 
 body {
   margin: 0;
-  font-family: system-ui, sans-serif;
+  font-family: var(--font-mono);
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--text);
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px),
+    radial-gradient(ellipse at 20% -10%, rgba(53, 201, 193, 0.08), transparent 55%),
+    radial-gradient(ellipse at 100% 110%, rgba(255, 92, 92, 0.05), transparent 45%);
+  background-size:
+    32px 32px,
+    32px 32px,
+    100% 100%,
+    100% 100%;
+  background-attachment: fixed;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
 }
 
 #app {
