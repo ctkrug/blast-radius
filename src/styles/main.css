@@ -135,3 +135,107 @@ h3 {
     min-height: 0;
   }
 }
+
+.command-input {
+  flex: 1;
+  min-height: 220px;
+  padding: var(--space-2);
+  background: var(--surface-2);
+  border: 1px solid rgba(53, 201, 193, 0.18);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 0.95rem;
+  resize: vertical;
+  transition:
+    border-color var(--transition),
+    box-shadow var(--transition);
+}
+
+.command-input::placeholder {
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+.command-input:hover {
+  border-color: rgba(53, 201, 193, 0.35);
+}
+
+.command-input:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow:
+    0 0 0 1px var(--accent),
+    0 0 16px rgba(53, 201, 193, 0.25);
+}
+
+.paste-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5em;
+  min-height: 44px;
+  padding: 0.7em 1.4em;
+  border: 1px solid transparent;
+  border-radius: var(--radius);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition:
+    transform 120ms ease-out,
+    box-shadow var(--transition),
+    background var(--transition),
+    color var(--transition),
+    border-color var(--transition);
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: var(--bg);
+  box-shadow: 0 0 0 1px rgba(53, 201, 193, 0.4);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: #4bdcd3;
+  box-shadow: 0 0 20px rgba(53, 201, 193, 0.35);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 0 0 1px rgba(53, 201, 193, 0.5);
+}
+
+.btn:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--bg),
+    0 0 0 4px var(--accent);
+}
+
+.btn:disabled {
+  background: var(--surface-2);
+  border-color: rgba(137, 150, 184, 0.2);
+  color: var(--text-muted);
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.btn-hint {
+  opacity: 0.7;
+  font-family: var(--font-mono);
+  font-size: 0.75em;
+}
+
+.paste-hint {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
