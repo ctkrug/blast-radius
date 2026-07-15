@@ -4,6 +4,14 @@
   "private": true,
   "description": "Paste a shell command, get a plain-English risk breakdown before you run it.",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ctkrug/blast-radius.git"
+  },
+  "homepage": "https://github.com/ctkrug/blast-radius#readme",
+  "bugs": {
+    "url": "https://github.com/ctkrug/blast-radius/issues"
+  },
   "engines": {
     "node": ">=20"
   },
