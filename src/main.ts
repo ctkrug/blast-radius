@@ -1,5 +1,6 @@
 import { analyze } from "./core/analyze";
 import { EXAMPLES, type Example } from "./core/examples";
+import { decodeCommandFromHash, encodeCommandToHash } from "./core/permalink";
 import type { Finding, Severity, Verdict } from "./core/types";
 
 function escapeHtml(value: string): string {
@@ -94,7 +95,8 @@ export function mount(root: HTMLElement): void {
             <button id="analyze-btn" class="btn btn-primary" type="button" disabled>
               Analyze<span class="btn-hint" aria-hidden="true">&#8984;&#9166;</span>
             </button>
-            <span class="paste-hint">Nothing you paste ever leaves your browser.</span>
+            <button id="share-btn" class="btn btn-secondary" type="button" disabled>Share</button>
+            <span class="paste-hint" id="paste-hint">Nothing you paste ever leaves your browser.</span>
           </div>
         </section>
 
@@ -117,6 +119,7 @@ export function mount(root: HTMLElement): void {
 
   const input = root.querySelector<HTMLTextAreaElement>("#command-input")!;
   const button = root.querySelector<HTMLButtonElement>("#analyze-btn")!;
+  const shareButton = root.querySelector<HTMLButtonElement>("#share-btn")!;
   const result = root.querySelector<HTMLDivElement>("#result")!;
   const exampleGrid = root.querySelector<HTMLDivElement>("#example-grid")!;
 
@@ -127,7 +130,9 @@ export function mount(root: HTMLElement): void {
   }
 
   function syncButtonState(): void {
-    button.disabled = input.value.trim().length === 0;
+    const isEmpty = input.value.trim().length === 0;
+    button.disabled = isEmpty;
+    shareButton.disabled = isEmpty;
   }
 
   input.addEventListener("input", syncButtonState);
@@ -140,6 +145,24 @@ export function mount(root: HTMLElement): void {
 
   button.addEventListener("click", runAnalysis);
 
+  shareButton.addEventListener("click", () => {
+    if (input.value.trim().length === 0) return;
+
+    window.location.hash = encodeCommandToHash(input.value);
+    const shareUrl = window.location.href;
+
+    navigator.clipboard?.writeText(shareUrl).catch(() => {
+      // Clipboard access can be denied/unavailable; the URL is already in
+      // the address bar via the hash update, so sharing still works.
+    });
+
+    const original = shareButton.textContent;
+    shareButton.textContent = "Copied!";
+    window.setTimeout(() => {
+      shareButton.textContent = original;
+    }, 1500);
+  });
+
   exampleGrid.addEventListener("click", (event) => {
     const card = (event.target as HTMLElement).closest<HTMLButtonElement>(".example-card");
     if (!card) return;
@@ -151,8 +174,15 @@ export function mount(root: HTMLElement): void {
     input.focus();
   });
 
-  syncButtonState();
-  result.innerHTML = verdictHtml({ overall: "safe", findings: [] }, false);
+  const sharedCommand = decodeCommandFromHash(window.location.hash);
+  if (sharedCommand) {
+    input.value = sharedCommand;
+    syncButtonState();
+    runAnalysis();
+  } else {
+    syncButtonState();
+    result.innerHTML = verdictHtml({ overall: "safe", findings: [] }, false);
+  }
 }
 
 const root = document.getElementById("app");
