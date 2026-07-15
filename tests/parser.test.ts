@@ -36,7 +36,12 @@ describe("parseTokens", () => {
   it("parses a sequence of commands with the correct operator between them", () => {
     const script = parse("a && b || c; d");
     expect(script.parts.map((p) => p.operatorAfter)).toEqual(["&&", "||", ";", null]);
-    expect(script.parts.map((p) => commandWords(p.pipeline.stages[0])[0])).toEqual(["a", "b", "c", "d"]);
+    expect(script.parts.map((p) => commandWords(p.pipeline.stages[0])[0])).toEqual([
+      "a",
+      "b",
+      "c",
+      "d",
+    ]);
   });
 
   it("allows a trailing separator with nothing after it", () => {

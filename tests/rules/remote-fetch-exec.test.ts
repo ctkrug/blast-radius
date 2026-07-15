@@ -27,7 +27,9 @@ describe("remoteFetchExecRule", () => {
   });
 
   it("names what was fetched and that it's piped to a shell", () => {
-    const findings = remoteFetchExecRule(pipeline("curl https://get.example.com/install.sh | bash"));
+    const findings = remoteFetchExecRule(
+      pipeline("curl https://get.example.com/install.sh | bash"),
+    );
     expect(findings[0].reason).toContain("https://get.example.com/install.sh");
     expect(findings[0].reason).toMatch(/bash/);
   });

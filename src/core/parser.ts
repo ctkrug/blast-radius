@@ -1,4 +1,11 @@
-import type { CommandNode, PipelineNode, RedirectKind, ScriptNode, SequenceOperator, SequencePart } from "./ast";
+import type {
+  CommandNode,
+  PipelineNode,
+  RedirectKind,
+  ScriptNode,
+  SequenceOperator,
+  SequencePart,
+} from "./ast";
 import type { Token } from "./tokenizer";
 
 export class ParseError extends Error {

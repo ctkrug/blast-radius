@@ -19,7 +19,8 @@ const SEVERITY_LABEL: Record<Severity, string> = {
 };
 
 function findingHtml(finding: Finding): string {
-  const pulse = finding.severity === "danger" ? '<span class="blast-pulse" aria-hidden="true"></span>' : "";
+  const pulse =
+    finding.severity === "danger" ? '<span class="blast-pulse" aria-hidden="true"></span>' : "";
   return `
     <li class="finding finding--${finding.severity}">
       <span class="severity-badge severity-badge--${finding.severity}">

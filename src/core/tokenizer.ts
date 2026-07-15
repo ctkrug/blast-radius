@@ -168,7 +168,10 @@ export function tokenize(source: string): Token[] {
             j++;
             break;
           }
-          if (cj === "\\" && (source[j + 1] === '"' || source[j + 1] === "\\" || source[j + 1] === "$")) {
+          if (
+            cj === "\\" &&
+            (source[j + 1] === '"' || source[j + 1] === "\\" || source[j + 1] === "$")
+          ) {
             buf += source[j + 1];
             j += 2;
             continue;

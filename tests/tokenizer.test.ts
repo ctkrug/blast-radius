@@ -46,7 +46,11 @@ describe("tokenize", () => {
   it("recognizes >, >>, and < as redirect operators", () => {
     const tokens = tokenize("a > out.txt; b >> out.txt; c < in.txt");
     const redirects = tokens.filter((t) => t.type.startsWith("redirect"));
-    expect(redirects.map((t) => t.type)).toEqual(["redirect-out", "redirect-append", "redirect-in"]);
+    expect(redirects.map((t) => t.type)).toEqual([
+      "redirect-out",
+      "redirect-append",
+      "redirect-in",
+    ]);
   });
 
   it("marks process substitution as an unsupported word instead of crashing", () => {

@@ -8,5 +8,9 @@ import { unsupportedSyntaxRule } from "./unsupported-syntax";
  * Central registry of risk rules. Each rule module (Epic 2) registers itself
  * here; the engine has no built-in knowledge of any specific danger pattern.
  */
-export const commandRules: CommandRule[] = [...baseCommandRules, sudoScopeRule, unsupportedSyntaxRule];
+export const commandRules: CommandRule[] = [
+  ...baseCommandRules,
+  sudoScopeRule,
+  unsupportedSyntaxRule,
+];
 export const pipelineRules: PipelineRule[] = [remoteFetchExecRule];
