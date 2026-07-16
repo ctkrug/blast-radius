@@ -36,6 +36,13 @@ function isWhitespace(ch: string): boolean {
   return ch === " " || ch === "\t" || ch === "\n" || ch === "\r";
 }
 
+/** Index just past a contiguous run of ASCII digits starting at `i` (equal to `i` if none). */
+function digitRunEnd(source: string, i: number): number {
+  let j = i;
+  while (j < source.length && source[j] >= "0" && source[j] <= "9") j++;
+  return j;
+}
+
 /**
  * Splits a shell command line into words and operator tokens.
  *
@@ -59,6 +66,32 @@ export function tokenize(source: string): Token[] {
     if (ch === "#") {
       // Comment: skip to end of line.
       while (i < n && source[i] !== "\n") i++;
+      continue;
+    }
+
+    if (ch >= "0" && ch <= "9") {
+      // A bare numeric token glued directly to a redirect (`2>err.log`, `1<in`)
+      // is a file-descriptor prefix, not a command argument — drop it, as a
+      // real shell would, and let the redirect operator below parse normally.
+      const digitsEnd = digitRunEnd(source, i);
+      const next = source[digitsEnd];
+      if (next === ">" || next === "<") {
+        i = digitsEnd;
+        continue;
+      }
+    }
+
+    if (ch === "&" && source[i + 1] === ">" && source[i + 2] === ">") {
+      // `&>>file` — append both stdout and stderr to a file.
+      tokens.push({ type: "redirect-append", value: "&>>", start: i, end: i + 3 });
+      i += 3;
+      continue;
+    }
+
+    if (ch === "&" && source[i + 1] === ">") {
+      // `&>file` — redirect both stdout and stderr to a file.
+      tokens.push({ type: "redirect-out", value: "&>", start: i, end: i + 2 });
+      i += 2;
       continue;
     }
 
@@ -98,6 +131,16 @@ export function tokenize(source: string): Token[] {
       continue;
     }
 
+    if (ch === ">" && source[i + 1] === "&") {
+      // `>&2` / `2>&1` — duplicates one file descriptor onto another; there's
+      // no file target to reason about, so consume it as a no-op.
+      const digitsEnd = digitRunEnd(source, i + 2);
+      if (digitsEnd > i + 2) {
+        i = digitsEnd;
+        continue;
+      }
+    }
+
     if (ch === ">") {
       tokens.push({ type: "redirect-out", value: ">", start: i, end: i + 1 });
       i++;
@@ -129,6 +172,15 @@ export function tokenize(source: string): Token[] {
         unsupported: true,
       });
       continue;
+    }
+
+    if (ch === "<" && source[i + 1] === "&") {
+      // `<&3` — duplicates a file descriptor for input; no file target, no-op.
+      const digitsEnd = digitRunEnd(source, i + 2);
+      if (digitsEnd > i + 2) {
+        i = digitsEnd;
+        continue;
+      }
     }
 
     if (ch === "<") {
