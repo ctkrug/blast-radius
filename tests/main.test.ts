@@ -61,6 +61,27 @@ describe("mount", () => {
     expect(document.querySelectorAll(".finding--danger").length).toBeGreaterThan(0);
   });
 
+  it("renders a GitHub link and a portfolio cross-promotion link in the footer", () => {
+    const links = Array.from(document.querySelectorAll<HTMLAnchorElement>(".footer-links a"));
+    const hrefs = links.map((a) => a.getAttribute("href"));
+    expect(hrefs).toContain("https://github.com/ctkrug/blast-radius");
+    expect(hrefs).toContain("https://apps.charliekrug.com");
+  });
+
+  it("renders the below-the-fold FAQ answering the primary search intent", () => {
+    const summaries = Array.from(document.querySelectorAll(".faq-item summary")).map(
+      (el) => el.textContent?.trim() ?? "",
+    );
+    expect(summaries.length).toBeGreaterThanOrEqual(3);
+    expect(summaries.some((q) => /is this shell command safe/i.test(q))).toBe(true);
+  });
+
+  it("uses a single H1 for the wordmark so the page has one top-level heading", () => {
+    const h1s = document.querySelectorAll("h1");
+    expect(h1s).toHaveLength(1);
+    expect(h1s[0].classList.contains("wordmark")).toBe(true);
+  });
+
   it("escapes HTML in a pasted command instead of injecting markup", () => {
     const input = document.querySelector<HTMLTextAreaElement>("#command-input")!;
     const button = document.querySelector<HTMLButtonElement>("#analyze-btn")!;

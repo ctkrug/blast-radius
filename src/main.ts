@@ -76,10 +76,10 @@ export function mount(root: HTMLElement): void {
   root.innerHTML = `
     <div class="page">
       <header class="site-header">
-        <span class="wordmark">
+        <h1 class="wordmark">
           <span class="wordmark-glyph" aria-hidden="true">&#9678;</span>Blast<span class="wordmark-accent">Radius</span>
-        </span>
-        <p class="tagline">Know what a shell command actually does — before you run it.</p>
+        </h1>
+        <p class="tagline">Paste a shell command and find out if it's safe before you run it.</p>
       </header>
 
       <main class="hero">
@@ -112,8 +112,87 @@ export function mount(root: HTMLElement): void {
         <div class="example-grid" id="example-grid"></div>
       </section>
 
+      <section class="about" aria-labelledby="about-heading">
+        <h2 id="about-heading">Is this shell command safe? Read it before you run it.</h2>
+        <p>
+          Shell one-liners get copied from install pages, Stack Overflow, and an AI agent's
+          suggested next step, then pasted straight into a terminal. A 40-token pipeline of
+          pipes and redirects is hard to read at a glance, and most "is this safe" checkers are
+          keyword blocklists: they flag <code>rm -rf ./build</code> and <code>rm -rf /</code>
+          the same way, so they either cry wolf or miss the one line that matters. Blast Radius
+          parses the actual shell syntax and reasons about what the command does to your
+          machine, then explains each risk in one plain sentence.
+        </p>
+
+        <div class="faq">
+          <details class="faq-item" open>
+            <summary>Is this shell command safe to run?</summary>
+            <p>
+              Paste it in the box above and read the breakdown. Blast Radius parses the command
+              into pipelines, redirects, and arguments, then checks each part against a set of
+              risk rules: recursive deletes scoped by target, remote scripts piped into a shell,
+              <code>sudo</code> scope, outbound data, and writes to sensitive files. Every
+              finding names the exact part of the command it applies to. It is a fast first read,
+              not a substitute for understanding the command yourself.
+            </p>
+          </details>
+
+          <details class="faq-item">
+            <summary>How do I check a shell script before running it?</summary>
+            <p>
+              Copy the command or the relevant lines into the paste box and hit Analyze. You get
+              a per-finding list of what the script deletes, where it fetches from and pipes to,
+              and what it runs as root, without executing anything. Blast Radius never runs the
+              command; it only reads it, so checking a script here has no side effects on your
+              system.
+            </p>
+          </details>
+
+          <details class="faq-item">
+            <summary>Can this explain what a bash command does?</summary>
+            <p>
+              Yes. Instead of a single score, you get a short list of specific findings written
+              in plain English, each one pointing at the piece of the command that earned it.
+              A pattern like <code>curl https://example.com/install.sh | sudo bash</code> is
+              explained as fetching a remote script and running whatever the server returns as
+              code, with root privileges.
+            </p>
+          </details>
+
+          <details class="faq-item">
+            <summary>Does anything I paste get sent to a server?</summary>
+            <p>
+              No. Blast Radius runs entirely in your browser. There is no backend, no logging,
+              and no network request is made with what you paste. The commands people check here
+              are often the ones they are nervous about, so the tool is built to never be the
+              leak itself. The Share button encodes the command into the page URL locally; it is
+              only shared if you copy that link yourself.
+            </p>
+          </details>
+
+          <details class="faq-item">
+            <summary>What kinds of dangers does it detect?</summary>
+            <p>
+              Destructive filesystem operations scoped by target (<code>rm -rf /</code> versus
+              <code>rm -rf ./build</code>, <code>mkfs</code>, <code>dd</code> onto a raw device),
+              remote fetch-and-execute (<code>curl … | sh</code>), <code>sudo</code> and root
+              scope that compounds with what it escalates, outbound network calls and data
+              exfiltration shape, and redirects that overwrite sensitive paths like
+              <code>/etc/passwd</code> or <code>~/.ssh/authorized_keys</code>.
+            </p>
+          </details>
+        </div>
+      </section>
+
       <footer class="site-footer">
-        <p>100% client-side — no backend, no logging, no network call made with what you paste.</p>
+        <p class="footer-privacy">
+          100% client-side. No backend, no logging, no network call made with what you paste.
+        </p>
+        <p class="footer-links">
+          <a href="https://github.com/ctkrug/blast-radius" rel="noopener">View on GitHub</a>
+          <span class="footer-sep" aria-hidden="true">·</span>
+          <a href="https://apps.charliekrug.com" rel="noopener">More by Charlie Krug</a>
+        </p>
       </footer>
     </div>
   `;
