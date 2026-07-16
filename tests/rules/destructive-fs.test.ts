@@ -57,4 +57,9 @@ describe("destructiveFsRule", () => {
     const findings = destructiveFsRule(firstCommand("dd if=file.img of=backup.img"));
     expect(findings).toHaveLength(0);
   });
+
+  it("does not flag dd discarding output to /dev/null (a common benchmarking idiom)", () => {
+    const findings = destructiveFsRule(firstCommand("dd if=/dev/sda of=/dev/null bs=1M"));
+    expect(findings).toHaveLength(0);
+  });
 });
