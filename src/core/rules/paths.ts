@@ -18,23 +18,29 @@ function stripTrailingSlashes(target: string): string {
   return stripped === "" ? "/" : stripped;
 }
 
-/** True for paths whose removal/overwrite would take out an entire filesystem root or home directory. */
-export function isCatastrophicTarget(target: string): boolean {
-  const normalized = stripTrailingSlashes(target);
+/** True for a bare (non-wildcard) path that names a whole critical root or home directory. */
+function isCatastrophicRoot(normalized: string): boolean {
   if (CATASTROPHIC_TARGETS.has(normalized)) return true;
   if (CRITICAL_ROOTS.has(normalized)) return true;
-  if (/^\/\*+$/.test(normalized)) return true;
   // A specific user's whole home directory (/home/alice) is exactly as
   // catastrophic as /root — just scoped to one non-root account.
   if (/^\/home\/[^/]+$/.test(normalized)) return true;
+  return false;
+}
+
+/** True for paths whose removal/overwrite would take out an entire filesystem root or home directory. */
+export function isCatastrophicTarget(target: string): boolean {
+  const normalized = stripTrailingSlashes(target);
+  if (isCatastrophicRoot(normalized)) return true;
+  if (/^\/\*+$/.test(normalized)) return true;
 
   // A wildcard that wipes everything inside a critical root or home
-  // directory (/etc/*, /home/*, ~/*) is just as catastrophic as removing
-  // the directory itself.
+  // directory (/etc/*, /home/*, /home/alice/*, ~/*) is just as
+  // catastrophic as removing the directory itself.
   const wildcardMatch = normalized.match(/^(.*)\/\*+$/);
   if (wildcardMatch) {
     const base = wildcardMatch[1] || "/";
-    if (CATASTROPHIC_TARGETS.has(base) || CRITICAL_ROOTS.has(base)) return true;
+    if (isCatastrophicRoot(base)) return true;
   }
 
   return false;
