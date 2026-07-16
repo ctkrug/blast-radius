@@ -54,7 +54,9 @@ function ddFinding(cmd: CommandNode, words: string[]): Finding[] {
   const ofArg = words.slice(1).find((w) => w.startsWith("of="));
   if (!ofArg) return [];
   const target = ofArg.slice(3);
-  if (!target.startsWith("/dev/")) return [];
+  // /dev/null discards data and can't be corrupted — writing to it is a
+  // routine "measure throughput, keep nothing" idiom, not a destructive one.
+  if (!target.startsWith("/dev/") || target === "/dev/null") return [];
   return [
     {
       severity: "danger",
