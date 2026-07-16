@@ -30,4 +30,15 @@ describe("sudoScopeRule", () => {
     expect(findings[0].severity).toBe("caution");
     expect(findings[0].reason).toMatch(/root/i);
   });
+
+  it("compounds sudo -u root rm -rf / to danger, skipping the -u value", () => {
+    const findings = sudoScopeRule(firstCommand("sudo -u root rm -rf /"));
+    expect(findings).toHaveLength(1);
+    expect(findings[0].severity).toBe("danger");
+  });
+
+  it("compounds sudo -u <user> rm -rf /etc to danger for a non-root target user", () => {
+    const findings = sudoScopeRule(firstCommand("sudo -u www-data rm -rf /etc"));
+    expect(findings[0].severity).toBe("danger");
+  });
 });
