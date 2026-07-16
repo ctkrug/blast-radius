@@ -13,6 +13,45 @@ const DATA_FLAGS = new Set([
   "--form",
 ]);
 const UPLOAD_FLAGS = new Set(["-T", "--upload-file"]);
+// Common curl/wget flags that consume the next argument as a value rather
+// than a target — without this, a value like a header or method name gets
+// mistaken for the URL.
+const VALUE_FLAGS = new Set([
+  "-X",
+  "--request",
+  "-H",
+  "--header",
+  "-A",
+  "--user-agent",
+  "-e",
+  "--referer",
+  "-o",
+  "--output",
+  "-O",
+  "--output-document",
+  "-u",
+  "--user",
+  "-b",
+  "--cookie",
+  "-c",
+  "--cookie-jar",
+  "-x",
+  "--proxy",
+  "-w",
+  "--write-out",
+  "-K",
+  "--config",
+  "-E",
+  "--cert",
+  "--cacert",
+  "--key",
+  "--connect-timeout",
+  "--max-time",
+  "--retry",
+  "--limit-rate",
+  "--interface",
+  "--resolve",
+]);
 
 function extractHost(urlLike: string): string {
   try {
@@ -47,9 +86,13 @@ export const networkExfilRule: CommandRule = (cmd) => {
       consumedAsValue.add(i + 1);
       fileBackedData = rest[i + 1] ?? fileBackedData;
     }
+    if (VALUE_FLAGS.has(word)) {
+      consumedAsValue.add(i + 1);
+    }
   }
 
   const target = rest.find((w, i) => !w.startsWith("-") && !consumedAsValue.has(i)) ?? "";
+  if (!target) return [];
   const host = extractHost(target);
 
   if (fileBackedData) {
