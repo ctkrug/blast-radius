@@ -67,7 +67,10 @@ rule directly.
   caution ("couldn't fully analyze this part") instead of a silent false "safe".
 - **`paths.ts`** — shared `isCatastrophicTarget`/`isSensitivePath` helpers used by
   `destructive-fs` and `sensitive-redirect`. Trailing slashes are normalized before matching
-  so `rm -rf /etc/` is judged the same as `rm -rf /etc`.
+  so `rm -rf /etc/` is judged the same as `rm -rf /etc`; a wildcard wipe of a critical root
+  (`/etc/*`, `/home/alice/*`) is judged the same as removing the directory itself; and
+  `$HOME`, `/root`, and `/home/<user>` are all normalized to the same home-relative form as
+  `~` so e.g. `/root/.ssh/authorized_keys` is recognized the same as `~/.ssh/authorized_keys`.
 - **`fetch-target.ts`** — shared `findFetchTarget` helper used by `network-exfil` and
   `remote-fetch-exec` to pick the real URL out of a curl/wget invocation's arguments, skipping
   both flags and the value a flag like `-X`/`-H`/`-o` consumes (otherwise that value gets
