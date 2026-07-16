@@ -48,10 +48,26 @@ const SENSITIVE_EXACT = new Set([
   "~/.profile",
 ]);
 
+// $HOME, /root, and /home/<user> are all just other spellings of "the home
+// directory" — normalize any of them down to a "~/..." path so every check
+// below only has to know about the tilde form.
+const HOME_PREFIX = /^(~\/|\$HOME\/|\/root\/|\/home\/[^/]+\/)/;
+
+function toHomeRelative(target: string): string | null {
+  const match = target.match(HOME_PREFIX);
+  return match ? `~/${target.slice(match[0].length)}` : null;
+}
+
 /** True for redirect targets under a security- or shell-startup-sensitive path. */
 export function isSensitivePath(target: string): boolean {
   if (SENSITIVE_EXACT.has(target)) return true;
   if (target.startsWith("/etc/")) return true;
-  if (target.startsWith("~/.ssh/")) return true;
+
+  const homeRelative = toHomeRelative(target);
+  if (homeRelative !== null) {
+    if (SENSITIVE_EXACT.has(homeRelative)) return true;
+    if (homeRelative.startsWith("~/.ssh/")) return true;
+  }
+
   return false;
 }
