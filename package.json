@@ -1,6 +1,6 @@
 {
   "name": "blast-radius",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "description": "Paste a shell command, get a plain-English risk breakdown before you run it.",
   "type": "module",
