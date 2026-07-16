@@ -52,4 +52,17 @@ describe("isSensitivePath", () => {
     expect(isSensitivePath("./out.txt")).toBe(false);
     expect(isSensitivePath("/tmp/out.txt")).toBe(false);
   });
+
+  it("flags $HOME/.ssh, /root/.ssh, and /home/<user>/.ssh the same as ~/.ssh", () => {
+    expect(isSensitivePath("$HOME/.ssh/authorized_keys")).toBe(true);
+    expect(isSensitivePath("/root/.ssh/authorized_keys")).toBe(true);
+    expect(isSensitivePath("/root/.ssh/id_rsa")).toBe(true);
+    expect(isSensitivePath("/home/alice/.ssh/authorized_keys")).toBe(true);
+  });
+
+  it("flags rc files under $HOME, /root, and /home/<user> the same as ~", () => {
+    expect(isSensitivePath("$HOME/.bashrc")).toBe(true);
+    expect(isSensitivePath("/root/.bashrc")).toBe(true);
+    expect(isSensitivePath("/home/alice/.zshrc")).toBe(true);
+  });
 });
