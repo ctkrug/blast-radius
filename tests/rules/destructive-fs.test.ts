@@ -20,6 +20,11 @@ describe("destructiveFsRule", () => {
     expect(findings[0].severity).toBe("danger");
   });
 
+  it("flags rm -rf /etc/ as danger despite the trailing slash", () => {
+    const findings = destructiveFsRule(firstCommand("rm -rf /etc/"));
+    expect(findings[0].severity).toBe("danger");
+  });
+
   it("flags rm -rf ./build as caution at most", () => {
     const findings = destructiveFsRule(firstCommand("rm -rf ./build"));
     expect(findings).toHaveLength(1);

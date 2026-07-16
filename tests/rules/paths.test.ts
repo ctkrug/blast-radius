@@ -15,6 +15,19 @@ describe("isCatastrophicTarget", () => {
     expect(isCatastrophicTarget("/tmp/scratch")).toBe(false);
     expect(isCatastrophicTarget("node_modules")).toBe(false);
   });
+
+  it("flags a critical root even with a trailing slash", () => {
+    expect(isCatastrophicTarget("/etc/")).toBe(true);
+    expect(isCatastrophicTarget("/home/")).toBe(true);
+    expect(isCatastrophicTarget("~/")).toBe(true);
+    expect(isCatastrophicTarget("$HOME/")).toBe(true);
+    expect(isCatastrophicTarget("/")).toBe(true);
+  });
+
+  it("flags a critical root with redundant repeated trailing slashes", () => {
+    expect(isCatastrophicTarget("/etc//")).toBe(true);
+    expect(isCatastrophicTarget("//")).toBe(true);
+  });
 });
 
 describe("isSensitivePath", () => {
