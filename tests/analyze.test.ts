@@ -65,6 +65,15 @@ describe("analyze", () => {
     expect(verdict.overall).toBe("danger");
   });
 
+  it("falls back to a bare caution, without crashing, when salvage can't find a parseable prefix", () => {
+    // The malformed separator sits right after the first token, so no
+    // bounded trim from the end can ever reach a parseable prefix — the
+    // salvage budget is exhausted and it must degrade gracefully.
+    const verdict = analyze("rm" + ";".repeat(5000));
+    expect(verdict.overall).toBe("caution");
+    expect(verdict.parseError).toBeDefined();
+  });
+
   it("analyzes a 200-token script in under 50ms", () => {
     const script = Array.from({ length: 100 }, (_, i) => `echo arg${i}`).join(" && ");
     const start = performance.now();
