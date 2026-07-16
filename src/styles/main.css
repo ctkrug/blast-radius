@@ -1,4 +1,8 @@
 :root {
+  /* Dark-only design: tell the browser so native UI (scrollbars, form
+     control chrome) matches instead of defaulting to a light flash. */
+  color-scheme: dark;
+
   --bg: #0a1128;
   --surface-1: #101b3d;
   --surface-2: #16234d;
