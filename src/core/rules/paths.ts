@@ -24,6 +24,16 @@ export function isCatastrophicTarget(target: string): boolean {
   if (CATASTROPHIC_TARGETS.has(normalized)) return true;
   if (CRITICAL_ROOTS.has(normalized)) return true;
   if (/^\/\*+$/.test(normalized)) return true;
+
+  // A wildcard that wipes everything inside a critical root or home
+  // directory (/etc/*, /home/*, ~/*) is just as catastrophic as removing
+  // the directory itself.
+  const wildcardMatch = normalized.match(/^(.*)\/\*+$/);
+  if (wildcardMatch) {
+    const base = wildcardMatch[1] || "/";
+    if (CATASTROPHIC_TARGETS.has(base) || CRITICAL_ROOTS.has(base)) return true;
+  }
+
   return false;
 }
 
