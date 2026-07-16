@@ -3,6 +3,29 @@ import type { CommandRule } from "../risk-engine";
 import { maxSeverity } from "../risk-engine";
 import { baseCommandRules } from "./registry";
 
+// sudo's own flags that take a following value — without this, the value
+// (e.g. the target user for -u) is mistaken for the inner command's name.
+const SUDO_VALUE_FLAGS = new Set([
+  "-u",
+  "--user",
+  "-g",
+  "--group",
+  "-h",
+  "--host",
+  "-p",
+  "--prompt",
+  "-r",
+  "--role",
+  "-t",
+  "--type",
+  "-a",
+  "--auth-type",
+  "-C",
+  "--close-from",
+  "-U",
+  "--other-user",
+]);
+
 const ROUTINE_ADMIN_COMMANDS = new Set([
   "apt",
   "apt-get",
@@ -27,7 +50,9 @@ function effectiveInnerCommand(cmd: CommandNode): CommandNode | null {
   if (words.length === 0 || words[0].value !== "sudo") return null;
 
   let i = 1;
-  while (i < words.length && words[i].value.startsWith("-")) i++;
+  while (i < words.length && words[i].value.startsWith("-")) {
+    i += SUDO_VALUE_FLAGS.has(words[i].value) ? 2 : 1;
+  }
   if (i >= words.length) return null;
 
   return {
