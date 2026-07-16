@@ -48,6 +48,10 @@ describe("isCatastrophicTarget", () => {
   it("does not flag a scoped subdirectory within a user's home", () => {
     expect(isCatastrophicTarget("/home/alice/tmp")).toBe(false);
   });
+
+  it("flags a wildcard wipe of a specific user's home, same as the bare path", () => {
+    expect(isCatastrophicTarget("/home/alice/*")).toBe(true);
+  });
 });
 
 describe("isSensitivePath", () => {
