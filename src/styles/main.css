@@ -409,6 +409,7 @@ h3 {
   flex-direction: column;
   gap: var(--space-2);
   padding: var(--space-3);
+  min-width: 0;
   min-height: 44px;
   background: var(--surface-1);
   border: 1px solid rgba(137, 150, 184, 0.15);
@@ -474,6 +475,8 @@ h3 {
 
 .example-reason {
   margin: 0;
+  min-width: 0;
+  overflow-wrap: anywhere;
   color: var(--text-muted);
   font-size: 0.85rem;
 }
