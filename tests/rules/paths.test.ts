@@ -39,6 +39,15 @@ describe("isCatastrophicTarget", () => {
     expect(isCatastrophicTarget("/tmp/*")).toBe(false);
     expect(isCatastrophicTarget("./build/*")).toBe(false);
   });
+
+  it("flags a specific user's entire home directory, same as /root", () => {
+    expect(isCatastrophicTarget("/home/alice")).toBe(true);
+    expect(isCatastrophicTarget("/home/alice/")).toBe(true);
+  });
+
+  it("does not flag a scoped subdirectory within a user's home", () => {
+    expect(isCatastrophicTarget("/home/alice/tmp")).toBe(false);
+  });
 });
 
 describe("isSensitivePath", () => {
