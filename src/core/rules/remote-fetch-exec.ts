@@ -1,6 +1,7 @@
 import { commandWords, type CommandNode, type PipelineNode } from "../ast";
 import type { PipelineRule } from "../risk-engine";
 import type { Finding } from "../types";
+import { findFetchTarget } from "./fetch-target";
 
 const FETCHERS = new Set(["curl", "wget"]);
 const SHELLS = new Set(["bash", "sh", "zsh", "dash", "ksh", "csh", "tcsh"]);
@@ -11,9 +12,7 @@ function isFetcher(cmd: CommandNode): boolean {
 }
 
 function fetchTarget(cmd: CommandNode): string | undefined {
-  return commandWords(cmd)
-    .slice(1)
-    .find((w) => !w.startsWith("-"));
+  return findFetchTarget(commandWords(cmd).slice(1));
 }
 
 interface ShellInvocation {

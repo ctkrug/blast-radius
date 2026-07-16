@@ -66,7 +66,12 @@ rule directly.
 - **`unsupported-syntax.ts`** — surfaces `CommandNode.hasUnsupportedSyntax` as an explicit
   caution ("couldn't fully analyze this part") instead of a silent false "safe".
 - **`paths.ts`** — shared `isCatastrophicTarget`/`isSensitivePath` helpers used by
-  `destructive-fs` and `sensitive-redirect`.
+  `destructive-fs` and `sensitive-redirect`. Trailing slashes are normalized before matching
+  so `rm -rf /etc/` is judged the same as `rm -rf /etc`.
+- **`fetch-target.ts`** — shared `findFetchTarget` helper used by `network-exfil` and
+  `remote-fetch-exec` to pick the real URL out of a curl/wget invocation's arguments, skipping
+  both flags and the value a flag like `-X`/`-H`/`-o` consumes (otherwise that value gets
+  mistaken for the target).
 - **`registry.ts`** — `baseCommandRules`: the command rules that apply standalone AND get
   re-run against the inner command by `sudo-scope.ts` (kept separate from `index.ts` to avoid
   a `sudo-scope.ts` <-> `index.ts` import cycle).

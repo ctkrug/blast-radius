@@ -1,5 +1,6 @@
 import { commandWords } from "../ast";
 import type { CommandRule } from "../risk-engine";
+import { VALUE_FLAGS } from "./fetch-target";
 
 const FETCH_TOOLS = new Set(["curl", "wget"]);
 const DATA_FLAGS = new Set([
@@ -13,45 +14,6 @@ const DATA_FLAGS = new Set([
   "--form",
 ]);
 const UPLOAD_FLAGS = new Set(["-T", "--upload-file"]);
-// Common curl/wget flags that consume the next argument as a value rather
-// than a target — without this, a value like a header or method name gets
-// mistaken for the URL.
-const VALUE_FLAGS = new Set([
-  "-X",
-  "--request",
-  "-H",
-  "--header",
-  "-A",
-  "--user-agent",
-  "-e",
-  "--referer",
-  "-o",
-  "--output",
-  "-O",
-  "--output-document",
-  "-u",
-  "--user",
-  "-b",
-  "--cookie",
-  "-c",
-  "--cookie-jar",
-  "-x",
-  "--proxy",
-  "-w",
-  "--write-out",
-  "-K",
-  "--config",
-  "-E",
-  "--cert",
-  "--cacert",
-  "--key",
-  "--connect-timeout",
-  "--max-time",
-  "--retry",
-  "--limit-rate",
-  "--interface",
-  "--resolve",
-]);
 
 function extractHost(urlLike: string): string {
   try {
