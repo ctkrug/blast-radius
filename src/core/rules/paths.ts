@@ -12,11 +12,18 @@ const CRITICAL_ROOTS = new Set([
   "/opt",
 ]);
 
+/** Collapses one or more trailing slashes so "/etc/" matches the same as "/etc". */
+function stripTrailingSlashes(target: string): string {
+  const stripped = target.replace(/\/+$/, "");
+  return stripped === "" ? "/" : stripped;
+}
+
 /** True for paths whose removal/overwrite would take out an entire filesystem root or home directory. */
 export function isCatastrophicTarget(target: string): boolean {
-  if (CATASTROPHIC_TARGETS.has(target)) return true;
-  if (CRITICAL_ROOTS.has(target)) return true;
-  if (/^\/\*+$/.test(target)) return true;
+  const normalized = stripTrailingSlashes(target);
+  if (CATASTROPHIC_TARGETS.has(normalized)) return true;
+  if (CRITICAL_ROOTS.has(normalized)) return true;
+  if (/^\/\*+$/.test(normalized)) return true;
   return false;
 }
 
