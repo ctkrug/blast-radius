@@ -24,6 +24,9 @@ export function isCatastrophicTarget(target: string): boolean {
   if (CATASTROPHIC_TARGETS.has(normalized)) return true;
   if (CRITICAL_ROOTS.has(normalized)) return true;
   if (/^\/\*+$/.test(normalized)) return true;
+  // A specific user's whole home directory (/home/alice) is exactly as
+  // catastrophic as /root — just scoped to one non-root account.
+  if (/^\/home\/[^/]+$/.test(normalized)) return true;
 
   // A wildcard that wipes everything inside a critical root or home
   // directory (/etc/*, /home/*, ~/*) is just as catastrophic as removing
