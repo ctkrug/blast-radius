@@ -70,4 +70,42 @@ describe("tokenize", () => {
     expect(tokens[0]).toMatchObject({ value: "rm", start: 0, end: 2 });
     expect(tokens[2]).toMatchObject({ value: "/", start: 7, end: 8 });
   });
+
+  it("drops a numeric fd prefix glued to a redirect (2>err.log)", () => {
+    const tokens = tokenize("cmd 2>err.log");
+    expect(tokens.map((t) => t.value)).toEqual(["cmd", ">", "err.log"]);
+    expect(tokens.map((t) => t.type)).toEqual(["word", "redirect-out", "word"]);
+  });
+
+  it("does not treat a spaced-out digit as a redirect fd prefix", () => {
+    const tokens = tokenize("echo 2 > file");
+    expect(tokens.map((t) => t.value)).toEqual(["echo", "2", ">", "file"]);
+  });
+
+  it("consumes fd-duplication (2>&1) as a no-op with no dangling operator", () => {
+    const tokens = tokenize("cmd 2>&1");
+    expect(tokens.map((t) => t.value)).toEqual(["cmd"]);
+  });
+
+  it("consumes bare fd-duplication (>&2) as a no-op", () => {
+    const tokens = tokenize("cmd >&2");
+    expect(tokens.map((t) => t.value)).toEqual(["cmd"]);
+  });
+
+  it("consumes input fd-duplication (<&3) as a no-op", () => {
+    const tokens = tokenize("cmd <&3");
+    expect(tokens.map((t) => t.value)).toEqual(["cmd"]);
+  });
+
+  it("recognizes &>file as a combined stdout+stderr redirect-out", () => {
+    const tokens = tokenize("cmd &>file");
+    expect(tokens.map((t) => t.value)).toEqual(["cmd", "&>", "file"]);
+    expect(tokens.map((t) => t.type)).toEqual(["word", "redirect-out", "word"]);
+  });
+
+  it("recognizes &>>file as a combined stdout+stderr redirect-append", () => {
+    const tokens = tokenize("cmd &>>file");
+    expect(tokens.map((t) => t.value)).toEqual(["cmd", "&>>", "file"]);
+    expect(tokens.map((t) => t.type)).toEqual(["word", "redirect-append", "word"]);
+  });
 });

