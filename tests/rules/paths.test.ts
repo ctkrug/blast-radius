@@ -28,6 +28,17 @@ describe("isCatastrophicTarget", () => {
     expect(isCatastrophicTarget("/etc//")).toBe(true);
     expect(isCatastrophicTarget("//")).toBe(true);
   });
+
+  it("flags a wildcard that wipes everything inside a critical root or home", () => {
+    expect(isCatastrophicTarget("/etc/*")).toBe(true);
+    expect(isCatastrophicTarget("/home/*")).toBe(true);
+    expect(isCatastrophicTarget("~/*")).toBe(true);
+  });
+
+  it("does not flag a wildcard scoped to a non-critical directory", () => {
+    expect(isCatastrophicTarget("/tmp/*")).toBe(false);
+    expect(isCatastrophicTarget("./build/*")).toBe(false);
+  });
 });
 
 describe("isSensitivePath", () => {
