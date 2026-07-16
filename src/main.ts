@@ -146,6 +146,9 @@ export function mount(root: HTMLElement): void {
 
   button.addEventListener("click", runAnalysis);
 
+  const shareLabel = shareButton.textContent;
+  let shareResetTimer: number | undefined;
+
   shareButton.addEventListener("click", () => {
     if (input.value.trim().length === 0) return;
 
@@ -157,10 +160,10 @@ export function mount(root: HTMLElement): void {
       // the address bar via the hash update, so sharing still works.
     });
 
-    const original = shareButton.textContent;
     shareButton.textContent = "Copied!";
-    window.setTimeout(() => {
-      shareButton.textContent = original;
+    window.clearTimeout(shareResetTimer);
+    shareResetTimer = window.setTimeout(() => {
+      shareButton.textContent = shareLabel;
     }, 1500);
   });
 
